@@ -1,0 +1,101 @@
+-- Criação das tabelas principais do LancheGo
+
+-- Extensões
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Enum para categorias de menu
+CREATE TYPE categoria_enum AS ENUM ('lanche', 'bebida', 'sobremesa', 'petisco');
+
+-- Enum para status de pedidos  
+CREATE TYPE status_pedido_enum AS ENUM ('novo', 'confirmado', 'preparando', 'pronto', 'entregue', 'cancelado');
+
+-- Tabela de categorias
+CREATE TABLE IF NOT EXISTS categorias (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL UNIQUE,
+    descricao TEXT,
+    icone VARCHAR(50),
+    ativo BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de itens do menu
+CREATE TABLE IF NOT EXISTS menu_items (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(10,2) NOT NULL,
+    categoria categoria_enum NOT NULL,
+    imagem VARCHAR(255),
+    disponivel BOOLEAN DEFAULT true,
+    ingredientes TEXT[], -- Array de strings
+    tags TEXT[], -- Array de strings  
+    categoria_id INTEGER REFERENCES categorias(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de clientes
+CREATE TABLE IF NOT EXISTS clientes (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20),
+    email VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de pedidos
+CREATE TABLE IF NOT EXISTS pedidos (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER REFERENCES clientes(id),
+    total DECIMAL(10,2) NOT NULL,
+    status status_pedido_enum DEFAULT 'novo',
+    observacoes_gerais TEXT,
+    mesa VARCHAR(10),
+    cliente_nome VARCHAR(100), -- Para pedidos sem cadastro
+    cliente_telefone VARCHAR(20), -- Para pedidos sem cadastro
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de itens do pedido
+CREATE TABLE IF NOT EXISTS pedido_itens (
+    id SERIAL PRIMARY KEY,
+    pedido_id INTEGER REFERENCES pedidos(id) ON DELETE CASCADE,
+    menu_item_id INTEGER REFERENCES menu_items(id),
+    quantidade INTEGER NOT NULL DEFAULT 1,
+    preco_unitario DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    observacoes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para performance
+CREATE INDEX IF NOT EXISTS idx_menu_items_categoria ON menu_items(categoria);
+CREATE INDEX IF NOT EXISTS idx_menu_items_disponivel ON menu_items(disponivel);
+CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos(status);
+CREATE INDEX IF NOT EXISTS idx_pedidos_created_at ON pedidos(created_at);
+CREATE INDEX IF NOT EXISTS idx_pedido_itens_pedido_id ON pedido_itens(pedido_id);
+
+-- Triggers para updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_categorias_updated_at BEFORE UPDATE ON categorias
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_menu_items_updated_at BEFORE UPDATE ON menu_items
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_clientes_updated_at BEFORE UPDATE ON clientes
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_pedidos_updated_at BEFORE UPDATE ON pedidos
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

@@ -3,11 +3,13 @@ export interface MenuItem {
   nome: string;
   descricao: string;
   preco: number;
-  categoria: MenuCategory;
+  categoria: MenuCategory | string; // Permitir string para dados da API
   imagem?: string;
   disponivel: boolean;
   ingredientes?: string[];
   tags?: string[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ItemCarrinho {
