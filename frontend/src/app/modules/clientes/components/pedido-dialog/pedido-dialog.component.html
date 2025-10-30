@@ -1,0 +1,197 @@
+<div class="pedido-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>receipt</mat-icon>
+      Finalizar Pedido
+    </h2>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Indicador de etapas -->
+  <div class="etapas-indicador">
+    <div class="etapa" [class.ativa]="etapaAtual >= 1" [class.concluida]="etapaAtual > 1">
+      <span class="numero">1</span>
+      <span class="label">Revisão</span>
+    </div>
+    <div class="etapa" [class.ativa]="etapaAtual >= 2" [class.concluida]="etapaAtual > 2">
+      <span class="numero">2</span>
+      <span class="label">Dados</span>
+    </div>
+    <div class="etapa" [class.ativa]="etapaAtual >= 3">
+      <span class="numero">3</span>
+      <span class="label">Confirmação</span>
+    </div>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <!-- Etapa 1: Revisão do Pedido -->
+    <div *ngIf="etapaAtual === 1" class="etapa-content">
+      <h3>Revise seu pedido</h3>
+      
+      <div class="itens-revisao">
+        <div *ngFor="let item of data.itens; let i = index" class="item-revisao">
+          <div class="item-info">
+            <h4>{{ item.menuItem.nome }}</h4>
+            <p class="preco-unitario">{{ item.menuItem.preco | currency:'BRL':'symbol':'1.2-2' }} cada</p>
+            <p *ngIf="item.observacoes" class="observacoes">
+              <strong>Obs:</strong> {{ item.observacoes }}
+            </p>
+          </div>
+          
+          <div class="item-controles">
+            <div class="quantidade-controle">
+              <button mat-icon-button (click)="atualizarQuantidade(i, item.quantidade - 1)">
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="quantidade">{{ item.quantidade }}</span>
+              <button mat-icon-button (click)="atualizarQuantidade(i, item.quantidade + 1)">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            
+            <div class="subtotal">
+              {{ item.subtotal | currency:'BRL':'symbol':'1.2-2' }}
+            </div>
+            
+            <button mat-icon-button color="warn" (click)="removerItem(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="total-secao">
+        <mat-divider></mat-divider>
+        <div class="total">
+          <strong>Total: {{ data.total | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Etapa 2: Dados do Cliente -->
+    <div *ngIf="etapaAtual === 2" class="etapa-content">
+      <h3>Seus dados</h3>
+      
+      <form [formGroup]="pedidoForm" class="cliente-form">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Nome *</mat-label>
+          <input matInput formControlName="nome" placeholder="Seu nome">
+          <mat-error *ngIf="pedidoForm.get('nome')?.hasError('required')">
+            Nome é obrigatório
+          </mat-error>
+          <mat-error *ngIf="pedidoForm.get('nome')?.hasError('minlength')">
+            Nome deve ter pelo menos 2 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Telefone</mat-label>
+          <input 
+            matInput 
+            formControlName="telefone" 
+            placeholder="(11) 99999-9999"
+            (input)="formatarTelefone($event)"
+            maxlength="15"
+          >
+          <mat-error *ngIf="pedidoForm.get('telefone')?.hasError('pattern')">
+            Formato inválido. Use: (11) 99999-9999
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Mesa</mat-label>
+          <input matInput formControlName="mesa" placeholder="Número da mesa (opcional)">
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Observações gerais</mat-label>
+          <textarea 
+            matInput 
+            formControlName="observacoesGerais" 
+            rows="3"
+            placeholder="Alguma observação sobre o pedido?"
+          ></textarea>
+        </mat-form-field>
+      </form>
+    </div>
+
+    <!-- Etapa 3: Confirmação -->
+    <div *ngIf="etapaAtual === 3" class="etapa-content">
+      <h3>Confirme seu pedido</h3>
+      
+      <div class="resumo-pedido">
+        <div class="resumo-cliente">
+          <h4>Dados do cliente:</h4>
+          <p><strong>Nome:</strong> {{ pedidoForm.value.nome }}</p>
+          <p *ngIf="pedidoForm.value.telefone">
+            <strong>Telefone:</strong> {{ pedidoForm.value.telefone }}
+          </p>
+          <p *ngIf="pedidoForm.value.mesa">
+            <strong>Mesa:</strong> {{ pedidoForm.value.mesa }}
+          </p>
+          <p *ngIf="pedidoForm.value.observacoesGerais">
+            <strong>Observações:</strong> {{ pedidoForm.value.observacoesGerais }}
+          </p>
+        </div>
+        
+        <mat-divider style="margin: 20px 0;"></mat-divider>
+        
+        <div class="resumo-itens">
+          <h4>Itens do pedido:</h4>
+          <div *ngFor="let item of data.itens" class="item-resumo">
+            <span class="item-nome">{{ item.quantidade }}x {{ item.menuItem.nome }}</span>
+            <span class="item-valor">{{ item.subtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
+          </div>
+        </div>
+        
+        <div class="total-final">
+          <strong>Total: {{ data.total | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <div class="actions-left">
+      <button 
+        mat-button 
+        (click)="etapaAnterior()" 
+        *ngIf="etapaAtual > 1"
+        [disabled]="loading"
+      >
+        <mat-icon>arrow_back</mat-icon>
+        Voltar
+      </button>
+    </div>
+    
+    <div class="actions-right">
+      <button mat-button (click)="cancelar()" [disabled]="loading">
+        Cancelar
+      </button>
+      
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="proximaEtapa()" 
+        *ngIf="etapaAtual < 3"
+        [disabled]="loading"
+      >
+        Continuar
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+      
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="finalizarPedido()" 
+        *ngIf="etapaAtual === 3"
+        [disabled]="!pedidoForm.valid || loading"
+      >
+        <mat-spinner *ngIf="loading" diameter="20" style="margin-right: 8px;"></mat-spinner>
+        {{ loading ? 'Processando...' : 'Confirmar Pedido' }}
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

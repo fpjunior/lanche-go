@@ -1,0 +1,78 @@
+<div class="clientes-dashboard">
+  <!-- Header com busca e carrinho -->
+  <div class="dashboard-header">
+    <div class="search-section">
+      <mat-form-field class="search-field" appearance="outline">
+        <mat-label>Buscar item...</mat-label>
+        <input 
+          matInput 
+          [(ngModel)]="searchQuery" 
+          (keyup.enter)="buscarItens()"
+          placeholder="Digite o nome do item"
+        >
+        <mat-icon matSuffix (click)="buscarItens()">search</mat-icon>
+      </mat-form-field>
+    </div>
+    
+    <div class="carrinho-section">
+      <button 
+        mat-fab 
+        color="primary" 
+        (click)="abrirCarrinho()"
+        [disabled]="quantidadeItensCarrinho === 0"
+      >
+        <mat-icon [matBadge]="quantidadeItensCarrinho" matBadgeColor="accent">shopping_cart</mat-icon>
+      </button>
+      <div class="carrinho-info" *ngIf="quantidadeItensCarrinho > 0">
+        <span class="total">{{ totalCarrinho | currency:'BRL':'symbol':'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros de categoria -->
+  <div class="categorias-section">
+    <mat-chip-listbox>
+      <mat-chip-option 
+        [selected]="categoriaSelecionada === null"
+        (click)="filtrarPorCategoria(null)"
+      >
+        <mat-icon>restaurant</mat-icon>
+        Todos
+      </mat-chip-option>
+      
+      <mat-chip-option 
+        *ngFor="let categoria of categorias"
+        [selected]="categoriaSelecionada === categoria"
+        (click)="filtrarPorCategoria(categoria)"
+      >
+        <mat-icon>{{ getCategoryIcon(categoria) }}</mat-icon>
+        {{ getCategoryLabel(categoria) }}
+      </mat-chip-option>
+    </mat-chip-listbox>
+  </div>
+
+  <!-- Grid de itens do menu -->
+  <div class="menu-grid" *ngIf="getItensVisiveis().length > 0">
+    <app-menu-item
+      *ngFor="let item of getItensVisiveis()"
+      [menuItem]="item"
+      (adicionarCarrinho)="adicionarAoCarrinho($event)"
+    ></app-menu-item>
+  </div>
+
+  <!-- Mensagem quando não há itens -->
+  <div class="no-items" *ngIf="getItensVisiveis().length === 0">
+    <mat-icon>search_off</mat-icon>
+    <h3>Nenhum item encontrado</h3>
+    <p *ngIf="searchQuery">Tente buscar por outro termo</p>
+    <p *ngIf="categoriaSelecionada && !searchQuery">Nenhum item disponível nesta categoria</p>
+    <button mat-button color="primary" (click)="filtrarPorCategoria(null); searchQuery = ''">
+      Ver todos os itens
+    </button>
+  </div>
+
+  <!-- Carrinho flutuante compacto -->
+  <div class="carrinho-flutuante" *ngIf="quantidadeItensCarrinho > 0">
+    <app-carrinho [compact]="true"></app-carrinho>
+  </div>
+</div>

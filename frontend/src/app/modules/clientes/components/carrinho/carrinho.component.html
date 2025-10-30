@@ -1,0 +1,124 @@
+<div class="carrinho-container" [class.compact]="compact">
+  <div class="carrinho-header" *ngIf="!compact">
+    <h2>Meu Carrinho</h2>
+    <button 
+      mat-icon-button 
+      (click)="limparCarrinho()"
+      *ngIf="itens.length > 0"
+      matTooltip="Limpar carrinho"
+    >
+      <mat-icon>delete_sweep</mat-icon>
+    </button>
+  </div>
+
+  <div class="carrinho-content">
+    <!-- Lista de itens -->
+    <div class="itens-lista" *ngIf="itens.length > 0">
+      <div 
+        *ngFor="let item of itens; let i = index" 
+        class="item-carrinho"
+        [class.compact-item]="compact"
+      >
+        <div class="item-info">
+          <h4 class="item-nome">{{ item.menuItem.nome }}</h4>
+          <p class="item-preco" *ngIf="!compact">
+            {{ item.menuItem.preco | currency:'BRL':'symbol':'1.2-2' }} cada
+          </p>
+          <p class="item-observacoes" *ngIf="item.observacoes && !compact">
+            <strong>Obs:</strong> {{ item.observacoes }}
+          </p>
+        </div>
+
+        <div class="item-controles">
+          <div class="quantidade-controle">
+            <button 
+              mat-icon-button 
+              (click)="atualizarQuantidade(i, item.quantidade - 1)"
+              [class.small-button]="compact"
+            >
+              <mat-icon>remove</mat-icon>
+            </button>
+            
+            <span class="quantidade">{{ item.quantidade }}</span>
+            
+            <button 
+              mat-icon-button 
+              (click)="atualizarQuantidade(i, item.quantidade + 1)"
+              [class.small-button]="compact"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <div class="item-subtotal">
+            {{ item.subtotal | currency:'BRL':'symbol':'1.2-2' }}
+          </div>
+
+          <button 
+            mat-icon-button 
+            color="warn" 
+            (click)="removerItem(i)"
+            [class.small-button]="compact"
+            *ngIf="!compact"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carrinho vazio -->
+    <div class="carrinho-vazio" *ngIf="itens.length === 0 && !compact">
+      <mat-icon>shopping_cart</mat-icon>
+      <p>Seu carrinho está vazio</p>
+      <small>Adicione itens do menu para fazer seu pedido</small>
+    </div>
+
+    <!-- Total -->
+    <div class="carrinho-total" *ngIf="itens.length > 0">
+      <mat-divider *ngIf="!compact"></mat-divider>
+      <div class="total-info">
+        <span class="total-label" *ngIf="!compact">Total:</span>
+        <span class="total-valor">{{ total | currency:'BRL':'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="total-itens" *ngIf="!compact">
+        {{ getQuantidadeTotal() }} {{ getQuantidadeTotal() === 1 ? 'item' : 'itens' }}
+      </div>
+      
+      <!-- Botões de ação -->
+      <div class="carrinho-acoes" *ngIf="!compact">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="finalizarPedido()"
+          class="botao-finalizar"
+        >
+          <mat-icon>payment</mat-icon>
+          Finalizar Pedido
+        </button>
+        
+        <button 
+          mat-stroked-button 
+          (click)="continuarComprando()"
+          class="botao-continuar"
+        >
+          <mat-icon>arrow_back</mat-icon>
+          Continuar Comprando
+        </button>
+      </div>
+
+      <!-- Botão compacto para mobile -->
+      <div class="carrinho-acoes-compact" *ngIf="compact">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="finalizarPedido()"
+          class="botao-finalizar-compact"
+        >
+          <mat-icon>payment</mat-icon>
+          Finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

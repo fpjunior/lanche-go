@@ -1,0 +1,96 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon color="primary" style="font-size: 40px;">restaurant</mat-icon>
+      </div>
+      <mat-card-title>LancheGo</mat-card-title>
+      <mat-card-subtitle>Sistema de Lanchonete</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            (input)="onEmailChange()"
+            placeholder="seu@email.com"
+          >
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+            Email é obrigatório
+          </mat-error>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+            Email inválido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Senha</mat-label>
+          <input
+            matInput
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="Digite sua senha"
+          >
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword = !hidePassword"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="hidePassword"
+          >
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            Senha é obrigatória
+          </mat-error>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
+            Senha deve ter pelo menos 6 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Módulo</mat-label>
+          <mat-select formControlName="module">
+            <mat-option *ngFor="let module of availableModules" [value]="module">
+              {{ getModuleLabel(module) }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>dashboard</mat-icon>
+          <mat-hint *ngIf="!modulesLoaded && loginForm.get('email')?.valid">
+            Digite um email válido para ver os módulos disponíveis
+          </mat-hint>
+          <mat-error *ngIf="loginForm.get('module')?.hasError('required')">
+            Selecione um módulo
+          </mat-error>
+        </mat-form-field>
+
+        <div class="login-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="!loginForm.valid || loading"
+            class="full-width"
+          >
+            <mat-spinner *ngIf="loading" diameter="20" style="margin-right: 10px;"></mat-spinner>
+            {{ loading ? 'Entrando...' : 'Entrar' }}
+          </button>
+        </div>
+      </form>
+
+      <mat-divider style="margin: 20px 0;"></mat-divider>
+      
+      <div class="demo-info">
+        <p><strong>Demo:</strong></p>
+        <p>Email: demo&#64;lanchego.com</p>
+        <p>Senha: 123456</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

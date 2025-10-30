@@ -1,0 +1,67 @@
+<mat-card class="menu-item-card" [class.unavailable]="!menuItem.disponivel">
+  <div class="item-image-container">
+    <img 
+      [src]="getImageUrl()" 
+      [alt]="menuItem.nome"
+      class="item-image"
+      (error)="onImageError($event)"
+    >
+    
+    <!-- Tags especiais -->
+    <div class="tags-overlay" *ngIf="menuItem.tags && menuItem.tags.length > 0">
+      <mat-chip 
+        *ngIf="hasTag('popular')" 
+        class="tag-chip popular"
+      >
+        <mat-icon>star</mat-icon>
+        Popular
+      </mat-chip>
+      
+      <mat-chip 
+        *ngIf="hasTag('vegetariano')" 
+        class="tag-chip vegetariano"
+      >
+        <mat-icon>eco</mat-icon>
+        Veggie
+      </mat-chip>
+      
+      <mat-chip 
+        *ngIf="hasTag('premium')" 
+        class="tag-chip premium"
+      >
+        <mat-icon>diamond</mat-icon>
+        Premium
+      </mat-chip>
+    </div>
+  </div>
+
+  <mat-card-content class="item-content">
+    <div class="item-header">
+      <h3 class="item-name">{{ menuItem.nome }}</h3>
+      <div class="item-price">
+        {{ menuItem.preco | currency:'BRL':'symbol':'1.2-2' }}
+      </div>
+    </div>
+    
+    <p class="item-description">{{ menuItem.descricao }}</p>
+    
+    <!-- Ingredientes -->
+    <div class="ingredients" *ngIf="menuItem.ingredientes && menuItem.ingredientes.length > 0">
+      <span class="ingredients-label">Ingredientes:</span>
+      <span class="ingredients-list">{{ menuItem.ingredientes.join(', ') }}</span>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions class="item-actions">
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onAdicionarCarrinho()"
+      [disabled]="!menuItem.disponivel"
+      class="add-button"
+    >
+      <mat-icon>add_shopping_cart</mat-icon>
+      {{ menuItem.disponivel ? 'Adicionar' : 'Indisponível' }}
+    </button>
+  </mat-card-actions>
+</mat-card>

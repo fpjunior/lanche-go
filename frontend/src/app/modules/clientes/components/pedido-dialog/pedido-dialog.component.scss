@@ -1,0 +1,246 @@
+.pedido-dialog {
+  max-width: 600px;
+  width: 100%;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 0;
+  
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: #333;
+  }
+}
+
+.etapas-indicador {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  gap: 20px;
+  
+  .etapa {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 100%;
+      width: 20px;
+      height: 2px;
+      background-color: #ddd;
+    }
+    
+    &:last-child::after {
+      display: none;
+    }
+    
+    &.ativa {
+      .numero {
+        background-color: #3f51b5;
+        color: white;
+      }
+      
+      .label {
+        color: #3f51b5;
+        font-weight: 500;
+      }
+    }
+    
+    &.concluida {
+      &::after {
+        background-color: #4caf50;
+      }
+      
+      .numero {
+        background-color: #4caf50;
+        color: white;
+      }
+      
+      .label {
+        color: #4caf50;
+      }
+    }
+    
+    .numero {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: #ddd;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .label {
+      font-size: 12px;
+      color: #666;
+      transition: all 0.3s ease;
+    }
+  }
+}
+
+.dialog-content {
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.etapa-content {
+  padding: 20px;
+  
+  h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+  }
+}
+
+.itens-revisao {
+  .item-revisao {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    gap: 15px;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+.item-info {
+  flex: 1;
+  
+  h4 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .preco-unitario {
+    margin: 0 0 5px 0;
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .observacoes {
+    margin: 0;
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+  }
+}
+
+.item-controles {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.quantidade-controle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .quantidade {
+    min-width: 20px;
+    text-align: center;
+    font-weight: 500;
+  }
+}
+
+.subtotal {
+  font-weight: 500;
+  color: #3f51b5;
+  min-width: 80px;
+  text-align: right;
+}
+
+.total-secao {
+  margin-top: 20px;
+  
+  .total {
+    text-align: right;
+    padding: 15px 0;
+    font-size: 18px;
+    color: #3f51b5;
+  }
+}
+
+.cliente-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.resumo-pedido {
+  .resumo-cliente {
+    h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    
+    p {
+      margin: 5px 0;
+      color: #666;
+    }
+  }
+  
+  .resumo-itens {
+    h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    
+    .item-resumo {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      
+      .item-nome {
+        color: #666;
+      }
+      
+      .item-valor {
+        font-weight: 500;
+        color: #3f51b5;
+      }
+    }
+  }
+  
+  .total-final {
+    text-align: right;
+    padding: 15px 0;
+    font-size: 20px;
+    color: #3f51b5;
+    border-top: 2px solid #eee;
+    margin-top: 15px;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 24px;
+  
+  .actions-left, .actions-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+}
