@@ -8,8 +8,8 @@ COPY package*.json ./
 # Instalar dependências
 RUN npm install && npm cache clean --force
 
-# Copiar código fonte
-COPY . .
+# Copiar código fonte (exceto arquivos que serão montados)
+COPY src ./src
 
 # Criar usuário não-root
 RUN addgroup -g 1001 -S nodejs
