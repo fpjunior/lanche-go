@@ -12,6 +12,11 @@ dotenv.config();
 import menuRoutes from './routes/menuRoutes.js';
 import pedidoRoutes from './routes/pedidoRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
+import authRoutes from './routes/auth.js';
+import usuariosRoutes from './routes/usuarios.js';
+
+// Importar configuração do banco
+import { testConnection } from './config/database.js';
 
 // Importar middleware de erro
 import { errorHandler } from './middleware/errorHandler.js';
@@ -60,6 +65,8 @@ app.get('/health', (req, res) => {
 });
 
 // Rotas da API
+app.use('/api/auth', authRoutes);
+app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/categorias', categoriaRoutes);
@@ -76,12 +83,25 @@ app.use('*', (req, res) => {
 app.use(errorHandler);
 
 // Inicializar servidor
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor LancheGo rodando na porta ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
-  console.log(`💾 Database: ${process.env.DB_NAME}@${process.env.DB_HOST}:${process.env.DB_PORT}`);
-});
+const startServer = async () => {
+  try {
+    // Testar conexão com banco de dados
+    await testConnection();
+    
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Servidor LancheGo rodando na porta ${PORT}`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+      console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
+      console.log(`💾 Database: lanchego@db:5432`);
+      console.log(`🔐 Sistema de autenticação ativo`);
+    });
+  } catch (error) {
+    console.error('❌ Erro ao inicializar servidor:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 // Tratamento de erros não capturados
 process.on('unhandledRejection', (err) => {

@@ -42,37 +42,51 @@ export class AuthService {
     }
   }
 
-  // Simulação de login para desenvolvimento
+  // Login usando API real
   login(email: string, password: string, module: string): Observable<LoginResponse> {
-    // Simulação de usuário válido
-    const mockUser: User = {
-      id: 1,
-      name: 'Usuário Demo',
+    const loginData = {
       email: email,
-      modules: ['clientes', 'cozinha', 'gerente', 'admin']
+      senha: password
     };
 
-    const mockResponse: LoginResponse = {
-      success: true,
-      user: mockUser,
-      token: 'mock-jwt-token',
-      modules: mockUser.modules
-    };
-
-    // Simular delay de rede
     return new Observable(observer => {
-      setTimeout(() => {
-        // Validação simples para desenvolvimento
-        if (email === 'demo@lanchego.com' && password === '123456') {
-          this.setCurrentUser(mockUser);
-          this.setSelectedModule(module);
-          localStorage.setItem('authToken', mockResponse.token);
-          observer.next(mockResponse);
-        } else {
-          observer.error({ message: 'Credenciais inválidas' });
+      this.http.post<any>(`${environment.apiUrl}/auth/login`, loginData).subscribe({
+        next: (response) => {
+          if (response.status === 'SUCCESS' && response.data?.usuario) {
+            const user: User = {
+              id: response.data.usuario.id,
+              name: response.data.usuario.nome,
+              email: response.data.usuario.email,
+              modules: response.data.usuario.modulos || []
+            };
+
+            const loginResponse: LoginResponse = {
+              success: true,
+              user: user,
+              token: response.data.token,
+              modules: user.modules
+            };
+
+            // Validar se o módulo selecionado está disponível para o usuário
+            if (user.modules.includes(module)) {
+              this.setCurrentUser(user);
+              this.setSelectedModule(module);
+              localStorage.setItem('authToken', response.data.token);
+              observer.next(loginResponse);
+            } else {
+              observer.error({ message: 'Nenhum módulo disponível para este email' });
+            }
+          } else {
+            observer.error({ message: response.message || 'Erro no login' });
+          }
+          observer.complete();
+        },
+        error: (error) => {
+          const errorMessage = error.error?.message || 'Credenciais inválidas';
+          observer.error({ message: errorMessage });
+          observer.complete();
         }
-        observer.complete();
-      }, 1000);
+      });
     });
   }
 
@@ -116,20 +130,28 @@ export class AuthService {
     return user ? user.modules : [];
   }
 
-  // Para desenvolvimento: buscar módulos disponíveis por email
+  // Buscar módulos disponíveis por email
   getModulesByEmail(email: string): Observable<string[]> {
-    // Simulação para desenvolvimento
-    const mockModules = ['clientes', 'cozinha', 'gerente', 'admin'];
-    
     return new Observable(observer => {
+      // Fazer uma tentativa de login temporária apenas para obter os módulos
+      // Ou implementar um endpoint específico no backend para buscar módulos por email
+      
+      // Por enquanto, retornar todos os módulos disponíveis no sistema
+      // O backend validará se o usuário tem acesso durante o login
+      const availableModules = [
+        'dashboard', 
+        'pedidos', 
+        'produtos', 
+        'clientes', 
+        'financeiro', 
+        'configuracoes', 
+        'usuarios'
+      ];
+      
       setTimeout(() => {
-        if (email === 'demo@lanchego.com') {
-          observer.next(mockModules);
-        } else {
-          observer.next([]);
-        }
+        observer.next(availableModules);
         observer.complete();
-      }, 500);
+      }, 300);
     });
   }
 }

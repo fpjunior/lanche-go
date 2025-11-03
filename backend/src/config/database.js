@@ -5,17 +5,22 @@ dotenv.config();
 
 const { Pool } = pkg;
 
-// Configuração da conexão
-const dbConfig = {
+// Configuração da conexão usando DATABASE_URL se disponível
+const dbConfig = process.env.DATABASE_URL ? {
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+} : {
   user: process.env.DB_USER || 'postgres',
   host: process.env.DB_HOST || 'localhost',
   database: process.env.DB_NAME || 'lanchego',
   password: process.env.DB_PASSWORD || 'postgres',
   port: parseInt(process.env.DB_PORT) || 5432,
-  // Configurações adicionais para produção
-  max: 20, // máximo de conexões no pool
-  idleTimeoutMillis: 30000, // tempo limite para conexões inativas
-  connectionTimeoutMillis: 2000, // tempo limite para obter conexão
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 };
 
 // Se tiver DATABASE_URL, usar ela (para deploy)
@@ -40,20 +45,6 @@ pool.on('error', (err) => {
   console.error('❌ Erro inesperado no pool de conexões:', err);
   process.exit(-1);
 });
-
-// Função para testar conexão
-export const testConnection = async () => {
-  try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT NOW()');
-    client.release();
-    console.log('✅ Conexão com banco de dados estabelecida:', result.rows[0].now);
-    return true;
-  } catch (err) {
-    console.error('❌ Erro ao conectar com o banco de dados:', err);
-    return false;
-  }
-};
 
 // Função para executar queries
 export const query = async (text, params) => {
@@ -86,6 +77,38 @@ export const transaction = async (callback) => {
     throw err;
   } finally {
     client.release();
+  }
+};
+
+// Função para testar a conexão e verificar tabelas de auth
+export const testConnection = async () => {
+  try {
+    const client = await pool.connect();
+    console.log('✅ Conexão com banco de dados testada com sucesso');
+    
+    // Verificar se as tabelas de usuários existem
+    const result = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_name IN ('usuarios', 'modulos', 'usuario_modulos')
+      ORDER BY table_name
+    `);
+    
+    const tabelas = result.rows.map(r => r.table_name);
+    console.log(`📊 Tabelas de autenticação encontradas: ${tabelas.join(', ')}`);
+    
+    if (tabelas.length === 3) {
+      console.log('🔐 Sistema de autenticação pronto!');
+    } else {
+      console.log('⚠️ Algumas tabelas de autenticação estão faltando');
+    }
+    
+    client.release();
+    return true;
+  } catch (error) {
+    console.error('❌ Erro ao conectar com o banco de dados:', error);
+    return false;
   }
 };
 
