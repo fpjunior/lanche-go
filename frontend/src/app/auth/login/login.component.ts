@@ -94,20 +94,36 @@ export class LoginComponent implements OnInit {
 
   private redirectToModule(module: string): void {
     switch (module) {
+      case 'dashboard':
+        this.router.navigate(['/dashboard']);
+        break;
       case 'clientes':
         this.router.navigate(['/clientes']);
         break;
       case 'cozinha':
         this.router.navigate(['/cozinha']);
         break;
+      case 'pedidos':
+        this.router.navigate(['/pedidos']);
+        break;
+      case 'produtos':
+        this.router.navigate(['/produtos']);
+        break;
       case 'gerente':
         this.router.navigate(['/gerente']);
         break;
+      case 'financeiro':
+        this.router.navigate(['/financeiro']);
+        break;
+      case 'configuracoes':
+        this.router.navigate(['/configuracoes']);
+        break;
       case 'admin':
+      case 'usuarios':
         this.router.navigate(['/admin']);
         break;
       default:
-        this.router.navigate(['/']);
+        this.router.navigate(['/dashboard']);
         break;
     }
   }
@@ -122,10 +138,16 @@ export class LoginComponent implements OnInit {
 
   getModuleLabel(module: string): string {
     const labels: { [key: string]: string } = {
+      'dashboard': 'Dashboard',
       'clientes': 'Clientes',
       'cozinha': 'Cozinha',
+      'pedidos': 'Pedidos',
+      'produtos': 'Produtos',
       'gerente': 'Gerente',
-      'admin': 'Administrador'
+      'financeiro': 'Financeiro',
+      'configuracoes': 'Configurações',
+      'admin': 'Administrador',
+      'usuarios': 'Usuários'
     };
     return labels[module] || module;
   }

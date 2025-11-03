@@ -133,19 +133,18 @@ export class AuthService {
   // Buscar módulos disponíveis por email
   getModulesByEmail(email: string): Observable<string[]> {
     return new Observable(observer => {
-      // Fazer uma tentativa de login temporária apenas para obter os módulos
-      // Ou implementar um endpoint específico no backend para buscar módulos por email
-      
-      // Por enquanto, retornar todos os módulos disponíveis no sistema
-      // O backend validará se o usuário tem acesso durante o login
+      // Combinação dos módulos originais do lanche-go com os novos módulos do backend
       const availableModules = [
-        'dashboard', 
-        'pedidos', 
-        'produtos', 
-        'clientes', 
-        'financeiro', 
-        'configuracoes', 
-        'usuarios'
+        'dashboard',    // Novo módulo principal
+        'clientes',     // Original do lanche-go
+        'cozinha',      // Original do lanche-go  
+        'pedidos',      // Novo do backend
+        'produtos',     // Novo do backend
+        'gerente',      // Original do lanche-go
+        'financeiro',   // Novo do backend
+        'configuracoes', // Novo do backend
+        'admin',        // Original do lanche-go (equivale a usuarios)
+        'usuarios'      // Novo do backend
       ];
       
       setTimeout(() => {
