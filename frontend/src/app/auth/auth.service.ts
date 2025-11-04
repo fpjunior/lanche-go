@@ -40,6 +40,22 @@ export class AuthService {
     if (savedModule) {
       this.selectedModuleSubject.next(savedModule);
     }
+
+    // Verificar expiração do token periodicamente
+    this.startTokenExpirationCheck();
+  }
+
+  /**
+   * Inicia verificação periódica da expiração do token
+   */
+  private startTokenExpirationCheck(): void {
+    setInterval(() => {
+      const token = this.getToken();
+      if (token && !this.isTokenValid()) {
+        console.log('[AuthService] Token expirado detectado - fazendo logout automático');
+        this.logoutDueToExpiration();
+      }
+    }, 30000); // Verifica a cada 30 segundos
   }
 
   // Login usando API real
@@ -91,6 +107,7 @@ export class AuthService {
   }
 
   logout(): void {
+    console.log('[AuthService] Executando logout...');
     this.currentUserSubject.next(null);
     this.selectedModuleSubject.next('');
     localStorage.removeItem('currentUser');
@@ -117,7 +134,11 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.currentUserSubject.value !== null;
+    const user = this.currentUserSubject.value;
+    const token = this.getToken();
+    
+    // Verificar se há usuário E se o token é válido
+    return user !== null && token !== null && this.isTokenValid();
   }
 
   hasModule(module: string): boolean {
@@ -152,5 +173,93 @@ export class AuthService {
         observer.complete();
       }, 300);
     });
+  }
+
+  /**
+   * Obter token do localStorage
+   */
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  }
+
+  /**
+   * Verificar se o token JWT é válido e não expirou
+   */
+  isTokenValid(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return false;
+      
+      const payload = JSON.parse(atob(parts[1]));
+      if (!payload || typeof payload !== 'object') return false;
+      
+      if (!payload.exp) return false;
+      
+      // exp é em segundos desde epoch, precisa ser convertido para milissegundos
+      const expTimestamp = payload.exp * 1000;
+      const now = Date.now();
+      
+      // Log para debug da expiração
+      if (now > expTimestamp) {
+        console.log('[AuthService] Token expirado:', {
+          exp: new Date(expTimestamp),
+          now: new Date(now),
+          diffMinutes: Math.round((expTimestamp - now) / 60000)
+        });
+        return false;
+      }
+      
+      return true;
+    } catch (e) {
+      console.error('[AuthService] Erro ao verificar token:', e);
+      return false;
+    }
+  }
+
+  /**
+   * Logout devido à expiração do token
+   */
+  logoutDueToExpiration(): void {
+    console.log('[AuthService] Fazendo logout devido à expiração do token');
+    this.logout();
+    
+    // Só redireciona se não estiver já na página de login
+    if (this.router.url !== '/login') {
+      this.router.navigate(['/login']);
+    }
+  }
+
+  /**
+   * Obter tempo restante do token em minutos
+   */
+  getTokenTimeRemaining(): number {
+    const token = this.getToken();
+    if (!token) return 0;
+
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return 0;
+      
+      const payload = JSON.parse(atob(parts[1]));
+      if (!payload.exp) return 0;
+      
+      const expTimestamp = payload.exp * 1000;
+      const now = Date.now();
+      const remainingMs = expTimestamp - now;
+      
+      return Math.max(0, Math.floor(remainingMs / 60000)); // Retorna em minutos
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /**
+   * Verificar se o token expira em menos de X minutos
+   */
+  isTokenExpiringSoon(minutes: number = 5): boolean {
+    return this.getTokenTimeRemaining() <= minutes;
   }
 }

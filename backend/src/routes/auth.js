@@ -36,6 +36,13 @@ router.post('/logout', authenticateToken, AuthController.logout);
 router.get('/me', authenticateToken, AuthController.me);
 
 /**
+ * @route GET /api/auth/verify
+ * @desc Verificar validade do token
+ * @access Private
+ */
+router.get('/verify', authenticateToken, AuthController.verifyToken);
+
+/**
  * @route GET /api/auth/permissions
  * @desc Permissões do usuário autenticado
  * @access Private

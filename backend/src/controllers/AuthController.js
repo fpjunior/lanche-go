@@ -399,6 +399,78 @@ class AuthController {
       });
     }
   }
+
+  /**
+   * Verificar se o token ainda é válido
+   * @route GET /api/auth/verify
+   */
+  static async verifyToken(req, res) {
+    try {
+      // Se chegou até aqui, o token é válido (middleware authenticateToken já verificou)
+      const user = req.user;
+      
+      // Verificar se o usuário ainda existe no banco
+      const usuario = await Usuario.findById(user.id);
+      if (!usuario) {
+        return res.status(401).json({
+          status: 'ERROR',
+          message: 'Usuário não encontrado',
+          code: 'USER_NOT_FOUND'
+        });
+      }
+
+      // Calcular tempo restante do token
+      const now = Math.floor(Date.now() / 1000);
+      const timeRemaining = user.exp - now;
+
+      res.json({
+        status: 'SUCCESS',
+        data: {
+          valid: true,
+          user: {
+            id: usuario.id,
+            email: usuario.email,
+            nome: usuario.nome,
+            nivel: usuario.nivel,
+            modulos: usuario.modulos
+          },
+          expiresIn: timeRemaining,
+          expiresAt: new Date(user.exp * 1000)
+        }
+      });
+    } catch (error) {
+      console.error('❌ [AUTH] Erro na verificação do token:', error);
+      res.status(500).json({ 
+        status: 'ERROR',
+        message: 'Erro interno do servidor',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  }
+
+  /**
+   * Logout do usuário
+   * @route POST /api/auth/logout
+   */
+  static async logout(req, res) {
+    try {
+      // Com JWT stateless, o logout é basicamente informativo
+      // O frontend deve remover o token do localStorage
+      console.log(`🚪 [AUTH] Logout realizado: ${req.user?.email || 'usuário'}`);
+      
+      res.json({
+        status: 'SUCCESS',
+        message: 'Logout realizado com sucesso'
+      });
+    } catch (error) {
+      console.error('❌ [AUTH] Erro no logout:', error);
+      res.status(500).json({ 
+        status: 'ERROR',
+        message: 'Erro interno do servidor',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  }
 }
 
 export default AuthController;
