@@ -43,6 +43,13 @@ router.get('/me', authenticateToken, AuthController.me);
 router.get('/verify', authenticateToken, AuthController.verifyToken);
 
 /**
+ * @route POST /api/auth/modules-by-email
+ * @desc Buscar módulos disponíveis por email
+ * @access Public
+ */
+router.post('/modules-by-email', AuthController.modulesByEmail);
+
+/**
  * @route GET /api/auth/permissions
  * @desc Permissões do usuário autenticado
  * @access Private

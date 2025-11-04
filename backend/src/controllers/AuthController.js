@@ -449,6 +449,67 @@ class AuthController {
   }
 
   /**
+   * Buscar módulos disponíveis por email
+   * @route POST /api/auth/modules-by-email
+   */
+  static async modulesByEmail(req, res) {
+    try {
+      const { email } = req.body;
+
+      console.log('📋 [AUTH] Buscando módulos para email:', email);
+
+      // Validação básica
+      if (!email) {
+        return res.status(400).json({
+          status: 'ERROR',
+          message: 'Email é obrigatório',
+          code: 'MISSING_EMAIL'
+        });
+      }
+
+      // Buscar usuário
+      const usuario = await Usuario.findByEmail(email);
+      
+      if (!usuario) {
+        console.log('❌ [AUTH] Usuário não encontrado para módulos:', email);
+        return res.status(404).json({
+          status: 'ERROR',
+          message: 'Usuário não encontrado',
+          code: 'USER_NOT_FOUND'
+        });
+      }
+
+      console.log('👤 [AUTH] Usuário encontrado para módulos:', { 
+        id: usuario.id, 
+        email: usuario.email, 
+        modulos: usuario.modulos 
+      });
+
+      // Retornar módulos do usuário
+      const modules = usuario.modulos || [];
+      
+      res.json({
+        success: true,
+        modules: modules,
+        user: {
+          id: usuario.id,
+          email: usuario.email,
+          nome: usuario.nome,
+          nivel: usuario.nivel
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ [AUTH] Erro ao buscar módulos por email:', error);
+      res.status(500).json({
+        status: 'ERROR',
+        message: 'Erro interno do servidor',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  }
+
+  /**
    * Logout do usuário
    * @route POST /api/auth/logout
    */

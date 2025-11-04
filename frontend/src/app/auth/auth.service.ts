@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 
@@ -153,26 +154,20 @@ export class AuthService {
 
   // Buscar módulos disponíveis por email
   getModulesByEmail(email: string): Observable<string[]> {
-    return new Observable(observer => {
-      // Combinação dos módulos originais do lanche-go com os novos módulos do backend
-      const availableModules = [
-        'dashboard',    // Novo módulo principal
-        'clientes',     // Original do lanche-go
-        'cozinha',      // Original do lanche-go  
-        'pedidos',      // Novo do backend
-        'produtos',     // Novo do backend
-        'gerente',      // Original do lanche-go
-        'financeiro',   // Novo do backend
-        'configuracoes', // Novo do backend
-        'admin',        // Original do lanche-go (equivale a usuarios)
-        'usuarios'      // Novo do backend
-      ];
-      
-      setTimeout(() => {
-        observer.next(availableModules);
-        observer.complete();
-      }, 300);
-    });
+    return this.http.post<any>(`${environment.apiUrl}/auth/modules-by-email`, { email })
+      .pipe(
+        map(response => {
+          if (response.success && response.modules) {
+            return response.modules;
+          }
+          return [];
+        }),
+        catchError(error => {
+          console.error('Erro ao buscar módulos por email:', error);
+          // Fallback para módulos básicos em caso de erro
+          return of(['dashboard', 'clientes']);
+        })
+      );
   }
 
   /**
