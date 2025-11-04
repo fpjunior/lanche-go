@@ -10,11 +10,17 @@ dotenv.config();
 
 // Importar rotas
 import menuRoutes from './routes/menuRoutes.js';
+import menuItemsRoutes from './routes/menuItems.js';
 import pedidoRoutes from './routes/pedidoRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import authRoutes from './routes/auth.js';
 import usuariosRoutes from './routes/usuarios.js';
 import imageRoutes from './routes/images.js';
+
+console.log('📦 Módulos de rotas carregados:');
+console.log('- menuRoutes:', !!menuRoutes);
+console.log('- menuItemsRoutes:', !!menuItemsRoutes);
+console.log('- authRoutes:', !!authRoutes);
 
 // Importar configuração do banco
 import { testConnection } from './config/database.js';
@@ -55,8 +61,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Middleware de debug para todas as requisições
+app.use((req, res, next) => {
+  console.log(`🔍 Requisição: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 // Health check
 app.get('/health', (req, res) => {
+  console.log('🏥 Health check acessado!');
   res.status(200).json({
     status: 'OK',
     message: 'LancheGo API está funcionando',
@@ -66,18 +79,22 @@ app.get('/health', (req, res) => {
 });
 
 // Rotas da API
+console.log('🔧 Registrando rotas da API...');
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/menu', menuRoutes);
+app.use('/api/menu-items', menuItemsRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/images', imageRoutes);
+console.log('✅ Rotas registradas com sucesso!');
 
-// Rota 404
+// Rota 404 - DEVE SER A ÚLTIMA
 app.use('*', (req, res) => {
   res.status(404).json({
-    success: false,
-    message: `Rota ${req.method} ${req.originalUrl} não encontrada`
+    status: 'ERROR',
+    message: `Rota ${req.method} ${req.originalUrl} não encontrada`,
+    code: 'ROUTE_NOT_FOUND'
   });
 });
 

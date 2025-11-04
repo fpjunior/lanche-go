@@ -1,0 +1,95 @@
+<div class="menu-items-management">
+  <div class="header">
+    <h2>Gestão de Itens do Menu</h2>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Adicionar Item
+    </button>
+  </div>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar itens</mat-label>
+      <input matInput [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Nome ou descrição...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="category-field">
+      <mat-label>Categoria</mat-label>
+      <mat-select [(value)]="selectedCategory" (selectionChange)="onCategoryChange()">
+        <mat-option *ngFor="let category of categories" [value]="category.value">
+          {{ category.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="content" *ngIf="!loading; else loadingTemplate">
+    <div class="items-grid" *ngIf="menuItems.length > 0; else noItemsTemplate">
+      <mat-card *ngFor="let item of menuItems" class="item-card">
+        <div class="card-header">
+          <div class="item-image">
+            <img [src]="getImageUrl(item)" [alt]="item.nome" (error)="handleImageError($event)">
+          </div>
+          <div class="item-info">
+            <h3>{{ item.nome }}</h3>
+            <p class="description">{{ item.descricao || 'Sem descrição' }}</p>
+            <div class="price">{{ item.preco | currency:'BRL':'symbol':'1.2-2' }}</div>
+            <div class="category">
+              <mat-chip>{{ item.categoria_nome || item.categoria }}</mat-chip>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="tags" *ngIf="item.tags && item.tags.length > 0">
+            <mat-chip *ngFor="let tag of item.tags">{{ tag }}</mat-chip>
+          </div>
+          
+          <div class="ingredients" *ngIf="item.ingredientes && item.ingredientes.length > 0">
+            <strong>Ingredientes:</strong>
+            <span>{{ item.ingredientes.join(', ') }}</span>
+          </div>
+        </div>
+
+        <mat-card-actions class="card-actions">
+          <div class="status-toggle">
+            <mat-slide-toggle 
+              [checked]="item.disponivel" 
+              (change)="toggleAvailability(item)"
+              [color]="'primary'">
+              {{ item.disponivel ? 'Disponível' : 'Indisponível' }}
+            </mat-slide-toggle>
+          </div>
+
+          <div class="action-buttons">
+            <button mat-icon-button color="primary" (click)="openEditDialog(item)" matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteItem(item)" matTooltip="Excluir">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+    <ng-template #noItemsTemplate>
+      <div class="no-items">
+        <mat-icon>restaurant_menu</mat-icon>
+        <h3>Nenhum item encontrado</h3>
+        <p>Não há itens do menu cadastrados ainda.</p>
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          Criar primeiro item
+        </button>
+      </div>
+    </ng-template>
+  </div>
+
+  <ng-template #loadingTemplate>
+    <div class="loading">
+      <mat-spinner></mat-spinner>
+      <p>Carregando itens do menu...</p>
+    </div>
+  </ng-template>
+</div>

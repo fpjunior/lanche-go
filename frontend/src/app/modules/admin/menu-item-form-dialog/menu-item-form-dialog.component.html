@@ -1,0 +1,133 @@
+<div class="menu-item-form-dialog">
+  <h2 mat-dialog-title>{{ getTitle() }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-dialog-content class="dialog-content">
+      
+      <!-- Informações básicas -->
+      <div class="section">
+        <h3>Informações Básicas</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome do Item</mat-label>
+            <input matInput formControlName="nome" placeholder="Ex: Hambúrguer X-Bacon">
+            <mat-error *ngIf="form.get('nome')?.hasError('required')">
+              Nome é obrigatório
+            </mat-error>
+            <mat-error *ngIf="form.get('nome')?.hasError('maxlength')">
+              Nome deve ter no máximo 100 caracteres
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descrição</mat-label>
+            <textarea matInput formControlName="descricao" rows="3" 
+                      placeholder="Descreva o item do menu..."></textarea>
+            <mat-error *ngIf="form.get('descricao')?.hasError('maxlength')">
+              Descrição deve ter no máximo 500 caracteres
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Preço</mat-label>
+            <input matInput type="number" formControlName="preco" step="0.01" min="0">
+            <span matPrefix>R$ </span>
+            <mat-error *ngIf="form.get('preco')?.hasError('required')">
+              Preço é obrigatório
+            </mat-error>
+            <mat-error *ngIf="form.get('preco')?.hasError('min')">
+              Preço deve ser maior que zero
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Categoria</mat-label>
+            <mat-select formControlName="categoria">
+              <mat-option *ngFor="let category of categories" [value]="category.value">
+                {{ category.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('categoria')?.hasError('required')">
+              Categoria é obrigatória
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Imagem -->
+      <div class="section">
+        <h3>Imagem do Item</h3>
+        
+        <div class="image-upload-area">
+          <div class="image-preview" *ngIf="imagePreview">
+            <img [src]="imagePreview" alt="Preview">
+            <button type="button" mat-icon-button class="remove-image" (click)="removeImage()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+
+          <div class="upload-button" *ngIf="!imagePreview">
+            <input type="file" id="imageInput" accept="image/*" (change)="onFileSelected($event)" hidden>
+            <button type="button" mat-stroked-button (click)="clickImageInput('imageInput')">>
+              <mat-icon>add_photo_alternate</mat-icon>
+              Adicionar Imagem
+            </button>
+            <p class="upload-hint">PNG, JPG até 5MB</p>
+          </div>
+
+          <div class="change-image" *ngIf="imagePreview">
+            <input type="file" id="imageInput2" accept="image/*" (change)="onFileSelected($event)" hidden>
+            <button type="button" mat-button (click)="clickImageInput('imageInput2')">>
+              Alterar Imagem
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalhes adicionais -->
+      <div class="section">
+        <h3>Detalhes Adicionais</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Ingredientes</mat-label>
+            <input matInput formControlName="ingredientes" 
+                   placeholder="Ex: Pão, carne, queijo, bacon (separados por vírgula)">
+            <mat-hint>Separe os ingredientes por vírgula</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tags</mat-label>
+            <input matInput formControlName="tags" 
+                   placeholder="Ex: vegano, sem lactose, picante (separados por vírgula)">
+            <mat-hint>Separe as tags por vírgula</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-checkbox formControlName="disponivel">
+            Item disponível para pedidos
+          </mat-checkbox>
+        </div>
+      </div>
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="dialog-actions">
+      <button type="button" mat-button (click)="onCancel()" [disabled]="loading">
+        Cancelar
+      </button>
+      <button type="submit" mat-raised-button color="primary" [disabled]="!form.valid || loading">
+        <mat-spinner *ngIf="loading" diameter="20" style="margin-right: 10px;"></mat-spinner>
+        {{ getSubmitButtonText() }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

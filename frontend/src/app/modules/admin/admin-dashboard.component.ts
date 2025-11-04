@@ -1,7 +1,19 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-admin-dashboard',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule
+  ],
   template: `
     <div class="dashboard-container">
       <mat-card>
@@ -36,7 +48,7 @@ import { Component } from '@angular/core';
             <mat-icon>people</mat-icon>
             Usuários
           </button>
-          <button mat-button disabled>
+          <button mat-raised-button color="accent" (click)="navigateToMenuItems()">
             <mat-icon>restaurant_menu</mat-icon>
             Cardápio
           </button>
@@ -68,7 +80,12 @@ import { Component } from '@angular/core';
     li {
       margin: 5px 0;
     }
-  `],
-  standalone: false
+  `]
 })
-export class AdminDashboardComponent { }
+export class AdminDashboardComponent {
+  constructor(private router: Router) {}
+
+  navigateToMenuItems() {
+    this.router.navigate(['/admin/menu-items']);
+  }
+}
