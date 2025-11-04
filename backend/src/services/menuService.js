@@ -203,3 +203,58 @@ export const updateDisponibilidade = async (id, disponivel) => {
   const result = await query(sql, [disponivel, id]);
   return result.rows[0];
 };
+
+// Atualizar imagem do item
+export const updateMenuItemImage = async (id, imagemUrl) => {
+  const sql = `
+    UPDATE menu_items 
+    SET imagem = $1, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $2
+    RETURNING *
+  `;
+  
+  const result = await query(sql, [imagemUrl, id]);
+  
+  if (result.rows.length === 0) {
+    throw new AppError('Item do menu não encontrado', 404, 'MENU_ITEM_NOT_FOUND');
+  }
+  
+  return result.rows[0];
+};
+
+// Remover imagem do item
+export const removeMenuItemImage = async (id) => {
+  const sql = `
+    UPDATE menu_items 
+    SET imagem = NULL, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $2
+    RETURNING *
+  `;
+  
+  const result = await query(sql, [id]);
+  
+  if (result.rows.length === 0) {
+    throw new AppError('Item do menu não encontrado', 404, 'MENU_ITEM_NOT_FOUND');
+  }
+  
+  return result.rows[0];
+};
+
+// Buscar item com imagem
+export const getMenuItemWithImage = async (id) => {
+  const sql = `
+    SELECT 
+      id, nome, descricao, preco, categoria, imagem, 
+      disponivel, ingredientes, tags, created_at, updated_at
+    FROM menu_items
+    WHERE id = $1
+  `;
+  
+  const result = await query(sql, [id]);
+  
+  if (result.rows.length === 0) {
+    throw new AppError('Item do menu não encontrado', 404, 'MENU_ITEM_NOT_FOUND');
+  }
+  
+  return result.rows[0];
+};

@@ -34,8 +34,13 @@ export class ClientesDashboardComponent implements OnInit {
   }
 
   private carregarMenu(): void {
-    this.menuService.getMenuItems().subscribe(items => {
-      this.menuItems = items;
+    this.menuService.getMenuItems().subscribe({
+      next: (items) => {
+        this.menuItems = items;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar menu:', error);
+      }
     });
   }
 

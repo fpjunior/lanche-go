@@ -14,6 +14,7 @@ import pedidoRoutes from './routes/pedidoRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import authRoutes from './routes/auth.js';
 import usuariosRoutes from './routes/usuarios.js';
+import imageRoutes from './routes/images.js';
 
 // Importar configuração do banco
 import { testConnection } from './config/database.js';
@@ -70,6 +71,7 @@ app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/categorias', categoriaRoutes);
+app.use('/api/images', imageRoutes);
 
 // Rota 404
 app.use('*', (req, res) => {

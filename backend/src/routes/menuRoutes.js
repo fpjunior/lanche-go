@@ -28,4 +28,10 @@ router.delete('/:id', catchAsync(menuController.deleteMenuItem));
 // PATCH /api/menu/:id/disponibilidade - Alterar disponibilidade
 router.patch('/:id/disponibilidade', catchAsync(menuController.toggleDisponibilidade));
 
+// PUT /api/menu/:id/imagem - Atualizar imagem do item
+router.put('/:id/imagem', catchAsync(menuController.updateMenuItemImage));
+
+// DELETE /api/menu/:id/imagem - Remover imagem do item
+router.delete('/:id/imagem', catchAsync(menuController.removeMenuItemImage));
+
 export default router;

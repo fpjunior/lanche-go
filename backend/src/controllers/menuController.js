@@ -147,3 +147,42 @@ export const toggleDisponibilidade = async (req, res) => {
     data: updatedItem
   });
 };
+
+// PUT /api/menu/:id/imagem
+export const updateMenuItemImage = async (req, res) => {
+  const { id } = req.params;
+  const { imagemUrl } = req.body;
+  
+  if (!id || isNaN(id)) {
+    throw new AppError('ID inválido', 400, 'INVALID_ID');
+  }
+  
+  if (!imagemUrl) {
+    throw new AppError('URL da imagem é obrigatória', 400, 'MISSING_IMAGE_URL');
+  }
+  
+  const updatedItem = await menuService.updateMenuItemImage(parseInt(id), imagemUrl);
+  
+  res.status(200).json({
+    success: true,
+    message: 'Imagem do item atualizada com sucesso',
+    data: updatedItem
+  });
+};
+
+// DELETE /api/menu/:id/imagem
+export const removeMenuItemImage = async (req, res) => {
+  const { id } = req.params;
+  
+  if (!id || isNaN(id)) {
+    throw new AppError('ID inválido', 400, 'INVALID_ID');
+  }
+  
+  const updatedItem = await menuService.removeMenuItemImage(parseInt(id));
+  
+  res.status(200).json({
+    success: true,
+    message: 'Imagem do item removida com sucesso',
+    data: updatedItem
+  });
+};
