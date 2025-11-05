@@ -57,8 +57,22 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Middleware de parsing
-app.use(express.json({ limit: '10mb' }));
+// Middleware de parsing condicional
+app.use((req, res, next) => {
+  const contentType = req.headers['content-type'];
+  console.log(`🔍 [MIDDLEWARE] ${req.method} ${req.url} - Content-Type: ${contentType}`);
+  
+  // Se é multipart/form-data, pula o JSON parser
+  if (contentType && contentType.startsWith('multipart/form-data')) {
+    console.log(`📦 [MIDDLEWARE] Multipart detectado - pulando JSON parser`);
+    return next();
+  }
+  
+  console.log(`📝 [MIDDLEWARE] Aplicando JSON parser`);
+  // Senão aplica o JSON parser
+  express.json({ limit: '10mb' })(req, res, next);
+});
+
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Middleware de debug para todas as requisições

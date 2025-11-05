@@ -22,9 +22,13 @@ export class ApiInterceptor implements HttpInterceptor {
       
       // Adicionar token se disponível e não for rota de login
       const headers: any = {
-        'Content-Type': 'application/json',
         'Accept': 'application/json'
       };
+
+      // Só adicionar Content-Type: application/json se não for FormData
+      if (!(req.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+      }
 
       if (token && !req.url.includes('/auth/login')) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -33,6 +37,7 @@ export class ApiInterceptor implements HttpInterceptor {
       apiReq = req.clone({ setHeaders: headers });
       
       console.log('🔗 API Request:', apiReq.method, apiReq.url);
+      console.log('🔗 Content-Type será:', req.body instanceof FormData ? 'multipart/form-data (automático)' : 'application/json');
     }
     
     return next.handle(apiReq).pipe(

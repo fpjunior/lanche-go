@@ -261,6 +261,12 @@ class MenuItemsController {
    */
   static async update(req, res) {
     try {
+      console.log(`🔄 [UPDATE] Iniciando atualização do item ${req.params.id}`);
+      console.log(`🔄 [UPDATE] Content-Type: ${req.headers['content-type']}`);
+      console.log(`🔄 [UPDATE] Body keys:`, Object.keys(req.body));
+      console.log(`🔄 [UPDATE] Body:`, req.body);
+      console.log(`🔄 [UPDATE] File:`, req.file ? 'presente' : 'ausente');
+      
       const { id } = req.params;
       const {
         nome,
@@ -316,8 +322,17 @@ class MenuItemsController {
       // Por enquanto, apenas campos básicos sem imagem
       const result = await pool.query(`
         UPDATE menu_items SET 
-          nome = $1, descricao = $2, preco = $3, categoria = $4, disponivel = $5, updated_at = NOW()
-        WHERE id = $6
+          nome = $1, 
+          descricao = $2, 
+          preco = $3, 
+          categoria = $4, 
+          disponivel = $5,
+          image_data = $6,
+          image_name = $7,
+          image_mime_type = $8,
+          image_size = $9,
+          updated_at = NOW()
+        WHERE id = $10
         RETURNING *
       `, [
         nome || existingItem.nome,
@@ -325,6 +340,10 @@ class MenuItemsController {
         preco ? parseFloat(preco) : existingItem.preco,
         categoria || existingItem.categoria,
         disponivel !== undefined ? disponivel : existingItem.disponivel,
+        imageData,
+        imageName,
+        imageMimeType,
+        imageSize,
         id
       ]);
 
@@ -430,7 +449,27 @@ class MenuItemsController {
    * Middleware de upload
    */
   static uploadMiddleware() {
-    return upload.single('image');
+    return (req, res, next) => {
+      console.log(`🖼️ [UPLOAD MIDDLEWARE] ${req.method} ${req.url}`);
+      console.log(`🖼️ [UPLOAD MIDDLEWARE] Content-Type: ${req.headers['content-type']}`);
+      console.log(`🖼️ [UPLOAD MIDDLEWARE] Headers:`, req.headers);
+      
+      upload.single('image')(req, res, (err) => {
+        if (err) {
+          console.error(`❌ [UPLOAD MIDDLEWARE] Erro no multer:`, err);
+          return res.status(400).json({
+            status: 'ERROR',
+            message: err.message,
+            code: 'UPLOAD_ERROR'
+          });
+        }
+        
+        console.log(`✅ [UPLOAD MIDDLEWARE] Multer processado com sucesso`);
+        console.log(`🖼️ [UPLOAD MIDDLEWARE] File:`, req.file ? 'presente' : 'ausente');
+        console.log(`🖼️ [UPLOAD MIDDLEWARE] Body keys:`, Object.keys(req.body));
+        next();
+      });
+    };
   }
 }
 

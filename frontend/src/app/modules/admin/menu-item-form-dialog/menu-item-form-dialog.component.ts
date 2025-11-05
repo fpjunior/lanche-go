@@ -9,6 +9,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MenuItemsService } from 'src/app/services/menu-items.service';
 
 export interface MenuItem {
@@ -42,7 +44,9 @@ export interface DialogData {
     MatSelectModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatSnackBarModule
   ],
   templateUrl: './menu-item-form-dialog.component.html',
   styleUrls: ['./menu-item-form-dialog.component.scss']
@@ -53,6 +57,8 @@ export class MenuItemFormDialogComponent implements OnInit {
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   isEditMode = false;
+  isDragOver = false;
+  uploadProgress: number | null = null;
 
   categories = [
     { value: 'lanche', label: 'Lanche' },
@@ -64,6 +70,7 @@ export class MenuItemFormDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private menuItemsService: MenuItemsService,
+    private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<MenuItemFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) {
@@ -109,37 +116,90 @@ export class MenuItemFormDialogComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // Validar tipo de arquivo
-      if (!file.type.startsWith('image/')) {
-        alert('Apenas arquivos de imagem são permitidos');
-        return;
-      }
-
-      // Validar tamanho (5MB máximo)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('O arquivo deve ter no máximo 5MB');
-        return;
-      }
-
-      this.selectedFile = file;
-
-      // Criar preview
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.imagePreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
+      this.processFile(file);
     }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.processFile(files[0]);
+    }
+  }
+
+  private processFile(file: File): void {
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      this.snackBar.open('Apenas arquivos de imagem são permitidos', 'Fechar', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // Validar tamanho (5MB máximo)
+    if (file.size > 5 * 1024 * 1024) {
+      this.snackBar.open('O arquivo deve ter no máximo 5MB', 'Fechar', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    this.selectedFile = file;
+    this.uploadProgress = 0;
+
+    // Simular progresso de upload
+    const progressInterval = setInterval(() => {
+      if (this.uploadProgress !== null && this.uploadProgress < 100) {
+        this.uploadProgress += Math.random() * 30;
+        if (this.uploadProgress > 100) {
+          this.uploadProgress = 100;
+        }
+      } else {
+        clearInterval(progressInterval);
+        // Criar preview após "upload" completo
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.imagePreview = e.target.result;
+          this.uploadProgress = null;
+          this.snackBar.open('Imagem carregada com sucesso!', 'Fechar', {
+            duration: 2000,
+            panelClass: ['success-snackbar']
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    }, 200);
   }
 
   removeImage(): void {
     this.selectedFile = null;
     this.imagePreview = null;
+    this.uploadProgress = null;
     
     // Reset file input
     const fileInput = document.getElementById('imageInput') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
+    }
+    
+    const fileInput2 = document.getElementById('imageInput2') as HTMLInputElement;
+    if (fileInput2) {
+      fileInput2.value = '';
     }
   }
 
@@ -170,11 +230,14 @@ export class MenuItemFormDialogComponent implements OnInit {
           error: (error: any) => {
             console.error('Erro ao salvar item:', error);
             this.loading = false;
-            alert('Erro ao salvar item. Tente novamente.');
+            this.snackBar.open('Erro ao salvar item. Tente novamente.', 'Fechar', {
+              duration: 4000,
+              panelClass: ['error-snackbar']
+            });
           }
         });
       } else {
-        // Se há imagem, usar FormData (para implementação futura)
+        // Se há imagem, usar FormData
         const formData = new FormData();
         formData.append('nome', formValues.nome);
         formData.append('descricao', formValues.descricao || '');
@@ -184,6 +247,11 @@ export class MenuItemFormDialogComponent implements OnInit {
 
         // Adicionar imagem
         formData.append('image', this.selectedFile);
+
+        console.log('🔍 [FRONTEND] Enviando FormData com imagem');
+        console.log('🔍 [FRONTEND] selectedFile:', this.selectedFile);
+        console.log('🔍 [FRONTEND] isEditMode:', this.isEditMode);
+        console.log('🔍 [FRONTEND] item id:', this.data.item?.id);
 
         const request = this.isEditMode && this.data.item?.id
           ? this.menuItemsService.update(this.data.item.id, formData)
@@ -197,7 +265,10 @@ export class MenuItemFormDialogComponent implements OnInit {
           error: (error: any) => {
             console.error('Erro ao salvar item:', error);
             this.loading = false;
-            alert('Erro ao salvar item. Tente novamente.');
+            this.snackBar.open('Erro ao salvar item. Tente novamente.', 'Fechar', {
+              duration: 4000,
+              panelClass: ['error-snackbar']
+            });
           }
         });
       }
@@ -222,5 +293,18 @@ export class MenuItemFormDialogComponent implements OnInit {
     if (element) {
       element.click();
     }
+  }
+
+  onImageError(event: any): void {
+    console.error('Erro ao carregar imagem:', event);
+    this.imagePreview = null;
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 }

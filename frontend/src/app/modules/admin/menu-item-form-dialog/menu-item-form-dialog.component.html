@@ -64,25 +64,49 @@
         <h3>Imagem do Item</h3>
         
         <div class="image-upload-area">
-          <div class="image-preview" *ngIf="imagePreview">
-            <img [src]="imagePreview" alt="Preview">
-            <button type="button" mat-icon-button class="remove-image" (click)="removeImage()">
+          <!-- Preview da Imagem -->
+          <div class="image-preview" *ngIf="imagePreview && !uploadProgress">
+            <img [src]="imagePreview" alt="Preview" (error)="onImageError($event)">
+            <button type="button" mat-icon-button class="remove-image" (click)="removeImage()" title="Remover imagem">
               <mat-icon>close</mat-icon>
             </button>
+            <div class="image-info" *ngIf="selectedFile">
+              <small>{{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})</small>
+            </div>
           </div>
 
-          <div class="upload-button" *ngIf="!imagePreview">
+          <!-- Área de Upload -->
+          <div class="upload-button" *ngIf="!imagePreview || uploadProgress" 
+               (dragover)="onDragOver($event)" 
+               (dragleave)="onDragLeave($event)" 
+               (drop)="onDrop($event)"
+               [class.drag-over]="isDragOver"
+               [class.uploading]="uploadProgress">
             <input type="file" id="imageInput" accept="image/*" (change)="onFileSelected($event)" hidden>
-            <button type="button" mat-stroked-button (click)="clickImageInput('imageInput')">>
-              <mat-icon>add_photo_alternate</mat-icon>
-              Adicionar Imagem
-            </button>
-            <p class="upload-hint">PNG, JPG até 5MB</p>
+            
+            <!-- Estado normal -->
+            <div *ngIf="!uploadProgress">
+              <button type="button" mat-stroked-button (click)="clickImageInput('imageInput')" [disabled]="loading">
+                <mat-icon>add_photo_alternate</mat-icon>
+                Adicionar Imagem
+              </button>
+              <p class="upload-hint">PNG, JPG até 5MB</p>
+              <p class="drag-hint">ou arraste uma imagem aqui</p>
+            </div>
+            
+            <!-- Estado de upload -->
+            <div class="upload-progress" *ngIf="uploadProgress">
+              <mat-icon class="upload-icon">cloud_upload</mat-icon>
+              <mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+              <small>Enviando imagem... {{ uploadProgress }}%</small>
+            </div>
           </div>
 
-          <div class="change-image" *ngIf="imagePreview">
+          <!-- Botão para alterar imagem -->
+          <div class="change-image" *ngIf="imagePreview && !uploadProgress">
             <input type="file" id="imageInput2" accept="image/*" (change)="onFileSelected($event)" hidden>
-            <button type="button" mat-button (click)="clickImageInput('imageInput2')">>
+            <button type="button" mat-button (click)="clickImageInput('imageInput2')" [disabled]="loading">
+              <mat-icon>edit</mat-icon>
               Alterar Imagem
             </button>
           </div>
