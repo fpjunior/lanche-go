@@ -14,8 +14,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MenuItemsService } from 'src/app/services/menu-items.service';
+import { ImageService } from 'src/app/services/image.service';
 import { MenuItemFormDialogComponent } from '../menu-item-form-dialog/menu-item-form-dialog.component';
-import { environment } from '../../../../environments/environment';
 
 // Interface local temporária
 export interface MenuItem {
@@ -70,7 +70,8 @@ export class MenuItemsManagementComponent implements OnInit {
   constructor(
     private menuItemsService: MenuItemsService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private imageService: ImageService
   ) {}
 
   ngOnInit(): void {
@@ -171,11 +172,10 @@ export class MenuItemsManagementComponent implements OnInit {
   }
 
   getImageUrl(item: MenuItem): string {
-    if (item.image_url) {
-      return `${environment.apiUrl.replace('/api', '')}${item.image_url}`;
+    if (item?.image_url) {
+      return this.imageService.getImageUrl(item.image_url);
     }
-    // Retorna uma imagem placeholder simples usando data URL
-    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlbTwvdGV4dD4KICA8L3N2Zz4K';
+    return this.imageService.getPlaceholderImage('Imagem');
   }
 
   handleImageError(event: Event): void {

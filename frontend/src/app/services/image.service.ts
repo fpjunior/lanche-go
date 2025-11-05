@@ -137,16 +137,20 @@ export class ImageService {
   }
 
   /**
-   * Gerar URL completa da imagem
+   * Obter URL da imagem do menu
    */
   getImageUrl(filename: string): string {
-    if (!filename) return this.getPlaceholderImage('default');
+    if (!filename) {
+      return this.getPlaceholderImage('default');
+    }
     
     // Se já é uma URL completa, retorna como está
-    if (filename.startsWith('http')) return filename;
+    if (filename.startsWith('http')) {
+      return filename;
+    }
     
-    // Se é um caminho relativo da API, constrói a URL completa
-    if (filename.startsWith('/api/images/')) {
+    // Se é caminho da API (/api/menu-items/id/image), constroi URL completa
+    if (filename.startsWith('/api/')) {
       return `${environment.apiUrl.replace('/api', '')}${filename}`;
     }
     

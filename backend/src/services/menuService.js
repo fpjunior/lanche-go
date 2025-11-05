@@ -6,7 +6,9 @@ export const getAllMenuItems = async (disponivel = null) => {
   let sql = `
     SELECT 
       id, nome, descricao, preco, categoria, imagem, 
-      disponivel, ingredientes, tags, created_at, updated_at
+      disponivel, ingredientes, tags, created_at, updated_at,
+      CASE WHEN image_data IS NOT NULL THEN true ELSE false END as has_image,
+      CASE WHEN image_data IS NOT NULL THEN '/api/menu-items/' || id || '/image' ELSE null END as image_url
     FROM menu_items
   `;
   
@@ -28,7 +30,9 @@ export const getMenuItemsByCategory = async (categoria, disponivel = null) => {
   let sql = `
     SELECT 
       id, nome, descricao, preco, categoria, imagem, 
-      disponivel, ingredientes, tags, created_at, updated_at
+      disponivel, ingredientes, tags, created_at, updated_at,
+      CASE WHEN image_data IS NOT NULL THEN true ELSE false END as has_image,
+      CASE WHEN image_data IS NOT NULL THEN '/api/menu-items/' || id || '/image' ELSE null END as image_url
     FROM menu_items
     WHERE categoria = $1
   `;
@@ -51,7 +55,9 @@ export const searchMenuItems = async (searchTerm) => {
   const sql = `
     SELECT 
       id, nome, descricao, preco, categoria, imagem, 
-      disponivel, ingredientes, tags, created_at, updated_at
+      disponivel, ingredientes, tags, created_at, updated_at,
+      CASE WHEN image_data IS NOT NULL THEN true ELSE false END as has_image,
+      CASE WHEN image_data IS NOT NULL THEN '/api/menu-items/' || id || '/image' ELSE null END as image_url
     FROM menu_items
     WHERE disponivel = true
       AND (
@@ -83,7 +89,9 @@ export const getMenuItemById = async (id) => {
   const sql = `
     SELECT 
       id, nome, descricao, preco, categoria, imagem, 
-      disponivel, ingredientes, tags, created_at, updated_at
+      disponivel, ingredientes, tags, created_at, updated_at,
+      CASE WHEN image_data IS NOT NULL THEN true ELSE false END as has_image,
+      CASE WHEN image_data IS NOT NULL THEN '/api/menu-items/' || id || '/image' ELSE null END as image_url
     FROM menu_items
     WHERE id = $1
   `;

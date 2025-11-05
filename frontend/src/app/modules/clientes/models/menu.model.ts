@@ -8,6 +8,8 @@ export interface MenuItem {
   disponivel: boolean;
   ingredientes?: string[];
   tags?: string[];
+  has_image?: boolean; // Campo do backend
+  image_url?: string; // Campo do backend
   created_at?: string;
   updated_at?: string;
 }

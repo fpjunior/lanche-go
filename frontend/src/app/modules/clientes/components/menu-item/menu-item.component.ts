@@ -19,6 +19,17 @@ export class MenuItemComponent {
   }
 
   getImageUrl(): string {
+    console.log('🖼️ [MENU ITEM] menuItem:', this.menuItem);
+    console.log('🖼️ [MENU ITEM] has_image:', this.menuItem.has_image);
+    console.log('🖼️ [MENU ITEM] image_url:', this.menuItem.image_url);
+    console.log('🖼️ [MENU ITEM] imagem:', this.menuItem.imagem);
+    
+    // Priorizar image_url do backend (campo has_image e image_url)
+    if (this.menuItem.has_image && this.menuItem.image_url) {
+      return `http://localhost:3002${this.menuItem.image_url}`;
+    }
+    
+    // Fallback para campo imagem (antigo)
     if (this.menuItem.imagem) {
       return this.imageService.getImageUrl(this.menuItem.imagem);
     }

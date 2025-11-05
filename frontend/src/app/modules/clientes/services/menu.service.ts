@@ -24,11 +24,14 @@ export class MenuService {
   }
 
   getMenuItems(): Observable<MenuItem[]> {
-    return this.http.get<{success: boolean, data: MenuItem[]}>(`${this.apiUrl}`)
+    return this.http.get<{status: string, data: MenuItem[]}>(`http://localhost:3002/api/menu-items`)
       .pipe(
-        map(response => response.data),
+        map(response => {
+          console.log('🔍 [MENU SERVICE] Dados REAIS recebidos do backend:', response.data);
+          return response.data;
+        }),
         catchError(error => {
-          console.error('Erro ao buscar itens do menu:', error);
+          console.error('❌ [MENU SERVICE] Erro ao buscar itens - usando dados MOCK:', error);
           // Retornar dados mock em caso de erro
           return of(this.getMockData());
         })
@@ -36,11 +39,16 @@ export class MenuService {
   }
 
   getMenuItemsByCategory(category: MenuCategory): Observable<MenuItem[]> {
+    console.log('🔍 [MENU SERVICE] Buscando itens por categoria:', category);
     return this.http.get<{success: boolean, data: MenuItem[]}>(`${this.apiUrl}/categoria/${category}`)
       .pipe(
-        map(response => response.data),
+        map(response => {
+          console.log('🔍 [MENU SERVICE] Resposta por categoria:', response);
+          console.log('🔍 [MENU SERVICE] Dados por categoria:', response.data);
+          return response.data;
+        }),
         catchError(error => {
-          console.error('Erro ao buscar itens por categoria:', error);
+          console.error('❌ [MENU SERVICE] Erro ao buscar itens por categoria:', error);
           return of(this.getMockData().filter(item => item.categoria === category));
         })
       );
