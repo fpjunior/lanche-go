@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { MenuService } from '../../services/menu.service';
 import { CarrinhoService } from '../../services/carrinho.service';
 import { MenuItem, MenuCategory, ItemCarrinho } from '../../models/menu.model';
@@ -25,7 +26,8 @@ export class ClientesDashboardComponent implements OnInit {
     private menuService: MenuService,
     private carrinhoService: CarrinhoService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -93,6 +95,7 @@ export class ClientesDashboardComponent implements OnInit {
   }
 
   abrirCarrinho(): void {
+    // Abrir dialog de finalização do pedido
     const dialogRef = this.dialog.open(PedidoDialogComponent, {
       width: '600px',
       maxWidth: '90vw',
@@ -107,6 +110,11 @@ export class ClientesDashboardComponent implements OnInit {
         this.showMessage('Pedido realizado com sucesso!');
       }
     });
+  }
+
+  irParaCarrinho(): void {
+    // Navegar para a tela completa do carrinho
+    this.router.navigate(['/clientes/carrinho']);
   }
 
   private showMessage(message: string): void {

@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CarrinhoService } from '../../services/carrinho.service';
 import { ItemCarrinho } from '../../models/menu.model';
+import { PedidoDialogComponent } from '../pedido-dialog/pedido-dialog.component';
 
 @Component({
   selector: 'app-carrinho',
@@ -12,6 +13,7 @@ import { ItemCarrinho } from '../../models/menu.model';
 })
 export class CarrinhoComponent implements OnInit {
   @Input() compact = false;
+  @Output() finalizarClicked = new EventEmitter<void>();
   
   itens: ItemCarrinho[] = [];
   total = 0;
@@ -53,9 +55,35 @@ export class CarrinhoComponent implements OnInit {
   }
 
   finalizarPedido(): void {
-    // TODO: Implementar lógica de finalização do pedido
-    // Por enquanto, apenas mostra um alerta
-    alert('Funcionalidade de finalização do pedido será implementada em breve!');
+    if (this.itens.length === 0) {
+      alert('Carrinho está vazio!');
+      return;
+    }
+    
+    // Se estamos no modo compacto (sidebar), emitir evento para o dashboard
+    if (this.compact) {
+      this.finalizarClicked.emit();
+    } else {
+      // Se não estamos compacto, abrir modal diretamente
+      this.abrirModalPedido();
+    }
+  }
+
+  private abrirModalPedido(): void {
+    const dialogRef = this.dialog.open(PedidoDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: {
+        itens: this.itens,
+        total: this.total
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.pedidoCriado) {
+        console.log('Pedido finalizado com sucesso!');
+      }
+    });
   }
 
   continuarComprando(): void {

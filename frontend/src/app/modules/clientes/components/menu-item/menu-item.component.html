@@ -53,7 +53,9 @@
   </mat-card-content>
 
   <mat-card-actions class="item-actions">
+    <!-- Botão de adicionar quando item não está no carrinho -->
     <button 
+      *ngIf="!isInCart()"
       mat-raised-button 
       color="primary" 
       (click)="onAdicionarCarrinho()"
@@ -63,5 +65,28 @@
       <mat-icon>add_shopping_cart</mat-icon>
       {{ menuItem.disponivel ? 'Adicionar' : 'Indisponível' }}
     </button>
+
+    <!-- Controles de quantidade quando item está no carrinho -->
+    <div *ngIf="isInCart()" class="quantity-controls">
+      <button 
+        mat-icon-button 
+        color="primary"
+        (click)="decreaseQuantity()"
+        class="quantity-btn"
+      >
+        <mat-icon>remove</mat-icon>
+      </button>
+      
+      <span class="quantity-display">{{ getQuantityInCart() }}</span>
+      
+      <button 
+        mat-icon-button 
+        color="primary"
+        (click)="increaseQuantity()"
+        class="quantity-btn"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
   </mat-card-actions>
 </mat-card>

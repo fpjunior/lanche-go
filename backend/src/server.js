@@ -11,7 +11,7 @@ dotenv.config();
 // Importar rotas
 import menuRoutes from './routes/menuRoutes.js';
 import menuItemsRoutes from './routes/menuItems.js';
-import pedidoRoutes from './routes/pedidoRoutes.js';
+import pedidosRoutes from './routes/pedidos.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import authRoutes from './routes/auth.js';
 import usuariosRoutes from './routes/usuarios.js';
@@ -98,7 +98,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/menu-items', menuItemsRoutes);
-app.use('/api/pedidos', pedidoRoutes);
+app.use('/api/pedidos', pedidosRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/images', imageRoutes);
 console.log('✅ Rotas registradas com sucesso!');

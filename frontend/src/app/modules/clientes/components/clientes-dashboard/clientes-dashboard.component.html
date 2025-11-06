@@ -73,6 +73,9 @@
 
   <!-- Carrinho flutuante compacto -->
   <div class="carrinho-flutuante" *ngIf="quantidadeItensCarrinho > 0">
-    <app-carrinho [compact]="true"></app-carrinho>
+    <app-carrinho 
+      [compact]="true"
+      (finalizarClicked)="abrirCarrinho()"
+    ></app-carrinho>
   </div>
 </div>

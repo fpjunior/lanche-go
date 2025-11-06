@@ -1,6 +1,8 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { MenuItem } from '../../models/menu.model';
 import { ImageService } from '../../../../services/image.service';
+import { CarrinhoService } from '../../services/carrinho.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-menu-item',
@@ -13,9 +15,38 @@ export class MenuItemComponent {
   @Output() adicionarCarrinho = new EventEmitter<MenuItem>();
 
   private imageService = inject(ImageService);
+  private carrinhoService = inject(CarrinhoService);
+  private snackBar = inject(MatSnackBar);
 
   onAdicionarCarrinho(): void {
+    // Emite o evento para o dashboard tratar
     this.adicionarCarrinho.emit(this.menuItem);
+  }
+
+  getQuantityInCart(): number {
+    return this.carrinhoService.getQuantidadeItem(this.menuItem.id);
+  }
+
+  isInCart(): boolean {
+    return this.getQuantityInCart() > 0;
+  }
+
+  increaseQuantity(): void {
+    this.carrinhoService.adicionarItem(this.menuItem, 1);
+    this.showMessage(`Quantidade atualizada!`);
+  }
+
+  decreaseQuantity(): void {
+    this.carrinhoService.diminuirQuantidade(this.menuItem.id);
+    this.showMessage(`Quantidade atualizada!`);
+  }
+
+  private showMessage(message: string): void {
+    this.snackBar.open(message, 'Fechar', {
+      duration: 2000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
   }
 
   getImageUrl(): string {
